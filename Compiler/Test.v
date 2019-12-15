@@ -517,6 +517,8 @@ Definition reg_3_rule_3 : RuleT :=
   ("reg_3_init", fun ty : (Kind -> Type) =>
       Write "reg_3" <- $$init_val;
       Read val : Data <- "reg_3";
+      Call x : Data <- "times_two"(#val : Data);
+      System [DispString _ "reg_3 times two = "; DispDecimal #x; DispString _ "\n"];
       System [DispString _ "reg_3_init:\n"];
       LETA _ : _ <- print_comparison #val $$write_val_2;
       Retv

@@ -1,4 +1,4 @@
-Require Import Fin Bool Kami.Lib.EclecticLib String Ascii List.
+Require Import Fin Bool Kami.Lib.EclecticLib String Ascii List Streams.
 Import ListNotations.
 
 Fixpoint Fin n :=
@@ -33,16 +33,16 @@ Fixpoint VecEq{n X} : (X -> X -> bool) -> Vec X n -> Vec X n -> bool :=
   | S m => fun eq v1 v2 => eq (fst v1) (fst v2) && VecEq eq (snd v1) (snd v2)
   end.
 
-Fixpoint vec_map{n X Y}(f : X -> Y) : Vec X n -> Vec Y n :=
+Fixpoint vmap{n X Y}(f : X -> Y) : Vec X n -> Vec Y n :=
   match n with
   | 0 => fun _ => tt
-  | S m => fun '(x,xs) => (f x, vec_map f xs)
+  | S m => fun '(x,xs) => (f x, vmap f xs)
   end.
 
-Fixpoint vec_to_list{n X} : Vec X n -> list X :=
+Fixpoint v_to_list{n X} : Vec X n -> list X :=
   match n with
   | 0 => fun _ => []
-  | S m => fun '(x,xs) => x::vec_to_list xs
+  | S m => fun '(x,xs) => x::v_to_list xs
   end.
 
 Fixpoint add_indices_aux{n X} : nat -> Vec X n -> Vec (nat * X) n :=
@@ -133,9 +133,26 @@ Fixpoint intersperse(x : string)(xs : list string) : list string :=
  *)
 End PrintUtil.
 
+Section Streams.
 
+CoFixpoint unwind_list_aux{X}(xs ys : list X) : ys <> [] -> Stream X :=
+  match ys return ys <> [] -> Stream X with
+  | [] => fun pf => match pf eq_refl with end
+  | y::zs => fun pf => match xs with
+                       | x::xs' => Cons x (unwind_list_aux xs' (y::zs) pf)
+                       | [] => Cons y (unwind_list_aux zs (y::zs) pf)
+                       end
+  end.
 
+Definition unwind_list{X}(xs : list X) : xs <> [] -> Stream X :=
+  unwind_list_aux xs xs.
 
+Fixpoint take{X}(n : nat)(xs : Stream X) : list X :=
+  match n with
+  | 0 => []
+  | S m => match xs with
+           | Cons x xs' => x :: take m xs'
+           end
+  end.
 
-
-
+End Streams.
