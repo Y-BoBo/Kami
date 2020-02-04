@@ -1,4 +1,4 @@
-Require Export List String Ascii.
+Require Export List String Ascii Streams.
 Require Export Kami.Syntax Kami.Compiler.CompilerSimple Kami.Compiler.Compiler Kami.Compiler.Rtl Kami.LibStruct Kami.Compiler.UnverifiedIncompleteCompiler.
 
 Require Import Kami.Notations.
@@ -16,9 +16,7 @@ Unset Extraction AutoInline.
 Extract Inductive sigT => "(,)" ["(,)"].
 Extract Inductive word => "CustomExtract.EWord" ["CustomExtract.wordNil" "CustomExtract.wordCons"] "CustomExtract.wordRec".
 Extract Inductive Fin.t => "CustomExtract.EFin" ["CustomExtract.fin0" "CustomExtract.finS"] "CustomExtract.finRec".
-(* Extract Inductive Vector.t => "[]" ["[]" "(\x xs -> x : xs)"] "(\fnil fcons xs -> case xs of { [] -> fnil (); (x:xs) -> fcons x xs })".
-Extract Inductive Vector.t => "[]" ["[]" "(:)"].
- *)
+Extract Inductive Stream => "[]" ["(:)"].
 
 Extract Inlined Constant fst => "Prelude.fst".
 Extract Inlined Constant snd => "Prelude.snd".
@@ -46,6 +44,12 @@ Extract Constant Fin.cast => "(\_ x _ -> x)".
 Extract Constant Fin.of_nat_lt => "(\i n -> (n Prelude.- 1,i))".
 Extract Constant Fin_eq_dec => "(\_ x y -> x Prelude.== y)".
 Extract Inlined Constant getBool => "Prelude.id".
+Extract Inlined Constant Streams.map => "Prelude.map".
+Extract Inlined Constant List.map => "Prelude.map".
+Extract Inlined Constant append => "(Prelude.++)".
+Extract Inlined Constant List.find => "Data.List.find".
+Extract Inlined Constant nat_decimal_string => "(Prelude.show :: Prelude.Int -> Prelude.String)".
+Extract Inlined Constant natToHexStr => "(\x -> CustomExtract.nat_hex (Prelude.fromIntegral x))".
 
 Section Ty.
   Variable ty: Kind -> Type.
@@ -57,7 +61,7 @@ Section Ty.
 
   Definition orKind k (ls: list (Bit (size k) @# ty)) := unpack k (CABit Bor ls).
 
-  Definition predPackOr k (ls: list ((Bool @# ty) * (k @# ty))) := (CABool Or (map fst ls), orKind k (map (fun '(p, v) => predPack p v) ls)).
+  Definition predPackOr k (ls: list ((Bool @# ty) * (k @# ty))) := (CABool Or (List.map fst ls), orKind k (List.map (fun '(p, v) => predPack p v) ls)).
 
   Definition createWriteRq ty (idxNum num: nat) (k: Kind) (idx: Bit (Nat.log2_up idxNum) @# ty) (val: Array num k @# ty): WriteRq (Nat.log2_up idxNum) (Array num k) @# ty :=
     STRUCT { "addr" ::= idx ;

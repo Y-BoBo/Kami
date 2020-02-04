@@ -97,6 +97,16 @@ End Tuple.
 
 Section Lookup.
 
+Fixpoint Fin_lookup{X}(pred : X -> bool){n} : (Fin.t n -> X) -> option (Fin.t n) :=
+  match n return (Fin.t n -> X) -> option (Fin.t n) with
+  | 0 => fun _ => None
+  | S m => fun f => if pred (f F1) then Some F1 else
+      match Fin_lookup pred (fun j => f (FS j)) with
+      | None => None
+      | Some i => Some (FS i)
+      end
+  end.
+
 Definition lookup{K X} : (K -> K -> bool) -> K -> list (K * X) -> option X :=
   fun eqbk key pairs => match List.find (fun p => eqbk key (fst p)) pairs with
                         | Some p => Some (snd p)
@@ -156,3 +166,17 @@ Fixpoint take{X}(n : nat)(xs : Stream X) : list X :=
   end.
 
 End Streams.
+
+Section Option.
+
+Definition o_bind{X Y}(o : option X)(cont : X -> option Y) : option Y :=
+  match o with
+  | Some x => cont x
+  | None => None
+  end.
+
+Definition o_ret{X}(x : X) : option X := Some x.
+
+End Option.
+
+Notation "'o_do' x <- y ; cont" := (o_bind y (fun x => cont)) (at level 20).

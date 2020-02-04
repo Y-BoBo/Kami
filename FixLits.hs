@@ -75,33 +75,33 @@ toks txt
     | T.null txt = []
     | otherwise = case T.stripPrefix "(:)" txt of
         Just rest -> Cons : toks rest
-        Nothing -> case T.stripPrefix "(" txt of
-            Just rest -> LParen : toks rest
-            Nothing -> case T.stripPrefix ")" txt of
-                Just rest -> RParen : toks rest
-                Nothing -> case T.stripPrefix "0" txt of
-                    Just rest -> Zero : toks rest
-                    Nothing -> case T.stripPrefix "Prelude.succ" txt of
-                        Just rest -> Succ : toks rest
+        Nothing -> case T.stripPrefix "(Prelude.succ :: Prelude.Int -> Prelude.Int)" txt of
+            Just rest -> Succ : toks rest
+            Nothing -> case T.stripPrefix "(" txt of
+                Just rest -> LParen : toks rest
+                Nothing -> case T.stripPrefix ")" txt of
+                    Just rest -> RParen : toks rest
+                    Nothing -> case T.stripPrefix "0" txt of
+                        Just rest -> Zero : toks rest
                         Nothing -> case T.stripPrefix "CustomExtract.wordNil" txt of
-                            Just rest -> WNil : toks rest
-                            Nothing -> case T.stripPrefix "CustomExtract.wordCons" txt of
-                                Just rest -> WCons : toks rest
-                                Nothing -> case T.stripPrefix "Prelude.True" txt of
-                                    Just rest -> BoolLit True : toks rest
-                                    Nothing -> case T.stripPrefix "Prelude.False" txt of
-                                        Just rest -> BoolLit False : toks rest
-                                        Nothing -> case T.stripPrefix "CustomExtract.fin0" txt of
-                                            Just rest -> FZero : toks rest
-                                            Nothing -> case T.stripPrefix "CustomExtract.finS" txt of
-                                                Just rest -> FSucc : toks rest
-                                                Nothing -> case T.stripPrefix "[]" txt of
-                                                    Just rest -> Nil : toks rest
-                                                    Nothing -> case stripChar txt of
-                                                        Just (t,rest) -> t : (toks rest)
-                                                        Nothing -> case isSpace $ T.head txt of
-                                                            True -> let (white,rest) = T.span isSpace txt in (White white) : toks rest
-                                                            False -> let (txt',rest) = T.span (\c -> not $ isSpace c && c /= '(' && c /= ')') txt in (Txt txt') : toks rest
+                                Just rest -> WNil : toks rest
+                                Nothing -> case T.stripPrefix "CustomExtract.wordCons" txt of
+                                    Just rest -> WCons : toks rest
+                                    Nothing -> case T.stripPrefix "Prelude.True" txt of
+                                        Just rest -> BoolLit True : toks rest
+                                        Nothing -> case T.stripPrefix "Prelude.False" txt of
+                                            Just rest -> BoolLit False : toks rest
+                                            Nothing -> case T.stripPrefix "CustomExtract.fin0" txt of
+                                                Just rest -> FZero : toks rest
+                                                Nothing -> case T.stripPrefix "CustomExtract.finS" txt of
+                                                    Just rest -> FSucc : toks rest
+                                                    Nothing -> case T.stripPrefix "[]" txt of
+                                                        Just rest -> Nil : toks rest
+                                                        Nothing -> case stripChar txt of
+                                                            Just (t,rest) -> t : (toks rest)
+                                                            Nothing -> case isSpace $ T.head txt of
+                                                                True -> let (white,rest) = T.span isSpace txt in (White white) : toks rest
+                                                                False -> let (txt',rest) = T.span (\c -> not $ isSpace c && c /= '(' && c /= ')') txt in (Txt txt') : toks rest
 
 drop_rps :: Int -> [Tok] -> [Tok]
 drop_rps n ts 
@@ -187,7 +187,7 @@ print_tok (Txt t) = t
 print_tok LParen = "("
 print_tok RParen = ")"
 print_tok Zero = "0"
-print_tok Succ = "Prelude.succ"
+print_tok Succ = "(Prelude.succ :: Prelude.Int -> Prelude.Int)"
 print_tok Nil = "[]"
 print_tok Cons = "(:)"
 --print_tok (Chr '\000') = single_quotes_txt "\\000"
@@ -213,6 +213,8 @@ main :: IO()
 main = do
     (fileIn:_) <- getArgs
     txt <- T.readFile fileIn
+    let tks = toks txt
+    putStrLn $ show tks
     T.writeFile fileIn $ T.concat $ map print_tok $ fix_lits $ toks txt
     --T.writeFile fileOut T.empty
 
