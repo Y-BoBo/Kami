@@ -87,3 +87,30 @@ do
     $SED -i -e '0,/^import/{s/^import/import qualified System.Exit\nimport/}' $file
   fi
 done
+
+for file in $(grep -l "System\.IO" $1/*.hs)
+do
+  grep -q "import qualified System\.IO" $file
+  if [ $? -ne 0 ]
+  then
+    $SED -i -e '0,/^import/{s/^import/import qualified System.IO\nimport/}' $file
+  fi
+done
+
+for file in $(grep -l "Data\.Map" $1/*.hs)
+do
+  grep -q "import qualified Data\.Map" $file
+  if [ $? -ne 0 ]
+  then
+    $SED -i -e '0,/^import/{s/^import/import qualified Data.Map\nimport/}' $file
+  fi
+done
+
+for file in $(grep -l "ParseExtract" $1/*.hs)
+do
+  grep -q "import qualified ParseExtract" $file
+  if [ $? -ne 0 ]
+  then
+    $SED -i -e '0,/^import/{s/^import/import qualified ParseExtract\nimport/}' $file
+  fi
+done
