@@ -16,7 +16,7 @@ Instance toString_sigma{X}{Y : X -> Type}`{toString X}`{forall x, toString (Y x)
   |}.
 
 Definition cart_prod{X Y}(xs : list X)(ys : list Y) : list (X * Y) :=
-  concat (map (fun x => map (pair x) ys) xs).
+  concat (List.map (fun x => List.map (pair x) ys) xs).
 
 Inductive FileType :=
   | AsyncF
@@ -59,7 +59,7 @@ Definition syncNotIsAddr_file_varieties : list FileTuple :=
   cart_prod (cart_prod (cart_prod [SyncNotIsAddr] [WriteFirst; WriteSecond; WriteThird]) [Over; Under; Disjoint]) [IsWrMask; NotIsWrMask].
 
 Definition dep_cart_prod{X}{Y : X -> Type}(xs : list X)(ys : forall x, list (Y x)) : list ({x : X & Y x}) :=
-  concat (map (fun x => map (fun y => existT Y x y) (ys x)) xs).
+  concat (List.map (fun x => List.map (fun y => existT Y x y) (ys x)) xs).
 
 Section Params.
 
@@ -444,13 +444,13 @@ Local Open Scope kami_expr.
 Local Open Scope kami_action.
 
 Definition all_async_rules : list RuleT :=
-  concat (map make_rules async_file_varieties).
+  concat (List.map make_rules async_file_varieties).
 
 Definition all_syncIsAddr_rules : list RuleT :=
-  concat (map make_rules syncIsAddr_file_varieties).
+  concat (List.map make_rules syncIsAddr_file_varieties).
 
 Definition all_syncNotIsAddr_rules : list RuleT :=
-  concat (map make_rules syncNotIsAddr_file_varieties).
+  concat (List.map make_rules syncNotIsAddr_file_varieties).
 
 (* registers *)
 (* write then read *)
@@ -568,15 +568,15 @@ Definition testSyncNotIsAddrBaseMod := BaseMod [
   ]
   (all_syncNotIsAddr_rules ++ [counter]) [].
 
-Definition testAsyncRFs := map make_RFB async_file_varieties.
+Definition testAsyncRFs := List.map make_RFB async_file_varieties.
 
-Definition testSyncIsAddrRFs := map make_RFB syncIsAddr_file_varieties.
+Definition testSyncIsAddrRFs := List.map make_RFB syncIsAddr_file_varieties.
 
-Definition testSyncNotIsAddrRFs := map make_RFB syncNotIsAddr_file_varieties.
+Definition testSyncNotIsAddrRFs := List.map make_RFB syncNotIsAddr_file_varieties.
 
 Definition mkTestMod(bm : BaseModule)(rfs : list RegFileBase) :=
-  let md := (fold_right ConcatMod bm (map (fun m => Base (BaseRegFile m)) rfs)) in
-  createHideMod md (map fst (getAllMethods md)).
+  let md := (fold_right ConcatMod bm (List.map (fun m => Base (BaseRegFile m)) rfs)) in
+  createHideMod md (List.map fst (getAllMethods md)).
 
 Definition testReg := mkTestMod testRegBaseMod [].
 

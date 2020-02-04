@@ -180,8 +180,6 @@ Fixpoint eval_Expr{k}(e : Expr eval_Kind k) : eval_FK k :=
   | BuildArray n k v => make_vec (fun i => eval_Expr (v i))
   end.
 
-<<<<<<< Updated upstream
-=======
 (* Fixpoint chop_word{n x} : Word (n * x) -> Vec n (Word x) :=
   match n with
   | 
@@ -199,7 +197,6 @@ Proof.
  *)
 
 
->>>>>>> Stashed changes
 Definition val_unpack(k : Kind) : Word (size k) -> eval_Kind k :=
   fun w => eval_Expr (unpack _ (Const _ (ConstBit (natToWord _ (word_to_nat w))))).
 
